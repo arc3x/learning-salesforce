@@ -13,13 +13,28 @@ public with sharing class AccountsContacts {
 		newContact = new Contact();
 	}
 
+	// Trigger method
+	public void updateContactCount(Contact[] NewContacts) {
+		System.debug(NewContacts);
+		for(Contact c: NewContacts) {
+			if (c.AccountId != null) {
+				String aid = c.AccountId;
+				Integer contact_count = [SELECT COUNT() FROM Contact WHERE AccountId=:aid];
+				Account a = [SELECT Id, ContactCount__c FROM Account WHERE Id=:aid];
+				a.ContactCount__c = contact_count;
+				System.debug(a.ContactCount__c);
+				update a;
+			}
+		}
+	}
+
 	// returns a list of accounts for page picklist
 	public List<SelectOption> getAccountOptions() {		
-		List<Account> acts = [SELECT Id, Name FROM Account];
+		List<Account> acts = [SELECT Id, Name, ContactCount__c FROM Account];
 		List<SelectOption> accountOptions = new List<SelectOption>();
 		// loop over accounts and add to SelectOption list
 		for(Account a : acts) {			
-			accountOptions.add(new SelectOption(a.Id, a.Name));				
+			accountOptions.add(new SelectOption(a.Id, a.Name+' ('+a.ContactCount__c+')'));				
 		}		
 		return accountOptions;
 	}
